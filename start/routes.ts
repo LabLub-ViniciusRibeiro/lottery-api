@@ -25,5 +25,18 @@ Route.get('/test-health', async ({ response }) => {
   const health = await Database.report();
   const { message } = health.health;
 
-  return response.send({message: message});
-})
+  return response.send({ message: message });
+});
+
+Route.get('/test-auth', ({ response }) => {
+  try {
+    response.ok({ message: "you are authenticated!" })
+  } catch (error) {
+    response.forbidden({ message: "you don't have the credentials" })
+  }
+}).middleware('auth');
+
+
+Route.post('/login', 'AuthController.login');
+
+Route.resource('/users', 'UsersController');
