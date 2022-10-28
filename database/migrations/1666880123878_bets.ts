@@ -3,12 +3,18 @@ import BaseSchema from '@ioc:Adonis/Lucid/Schema'
 export default class extends BaseSchema {
   protected tableName = 'bets'
 
-  public async up () {
+  public async up() {
     this.schema.createTable(this.tableName, (table) => {
       table.increments('id')
       table.uuid('secure_id').notNullable().unique()
       table.uuid('user_id').notNullable().unique().references("secure_id").inTable("users")
-      table.uuid('game_id').notNullable().unique().references("id").inTable("games")
+      table
+        .integer('game_id')
+        .unsigned()
+        .references("id")
+        .inTable("games")
+        .onDelete('CASCADE')
+        .notNullable()
       table.string('chosen_numbers').notNullable()
 
       /**
@@ -19,7 +25,7 @@ export default class extends BaseSchema {
     })
   }
 
-  public async down () {
+  public async down() {
     this.schema.dropTable(this.tableName)
   }
 }
