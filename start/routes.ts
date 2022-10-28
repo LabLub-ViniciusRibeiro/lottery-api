@@ -36,7 +36,13 @@ Route.get('/test-auth', ({ response }) => {
   }
 }).middleware('auth');
 
+// public routes
+Route.group(() => {
+  Route.post('/login', 'AuthController.login');
+  Route.post('/users', 'UsersController.store');
+})
 
-Route.post('/login', 'AuthController.login');
-
-Route.resource('/users', 'UsersController');
+// authenticated routes
+Route.group(() => {
+  Route.resource('/users', 'UsersController').except(['store']);
+}).middleware('auth')
