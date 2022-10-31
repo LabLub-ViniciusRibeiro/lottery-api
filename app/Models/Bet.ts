@@ -1,6 +1,8 @@
 import { DateTime } from 'luxon'
-import { BaseModel, BelongsTo, belongsTo, column } from '@ioc:Adonis/Lucid/Orm'
+import { BaseModel, beforeCreate, BelongsTo, belongsTo, column } from '@ioc:Adonis/Lucid/Orm'
 import User from './User'
+import { v4 as uuidv4 } from 'uuid'
+import Game from './Game'
 
 export default class Bet extends BaseModel {
   @column({ isPrimary: true })
@@ -16,7 +18,7 @@ export default class Bet extends BaseModel {
   public gameId: number
 
   @column()
-  public chosenNumbers: string
+  public chosenNumbers: number[]
 
   @column.dateTime({ autoCreate: true })
   public createdAt: DateTime
@@ -26,4 +28,13 @@ export default class Bet extends BaseModel {
 
   @belongsTo(() => User)
   public user: BelongsTo<typeof User>
+
+  @belongsTo(() => Game)
+  public game: BelongsTo<typeof Game>
+
+  @beforeCreate()
+  public static defineUUID(bet: Bet) {
+    bet.secureId = uuidv4()
+  }
+
 }

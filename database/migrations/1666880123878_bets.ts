@@ -7,7 +7,10 @@ export default class extends BaseSchema {
     this.schema.createTable(this.tableName, (table) => {
       table.increments('id')
       table.uuid('secure_id').notNullable().unique()
-      table.uuid('user_id').notNullable().unique().references("secure_id").inTable("users")
+      table.uuid('user_id')
+        .notNullable()
+        .references("secure_id")
+        .inTable("users")
       table
         .integer('game_id')
         .unsigned()

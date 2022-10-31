@@ -45,4 +45,5 @@ Route.group(() => {
 // authenticated routes
 Route.group(() => {
   Route.resource('/users', 'UsersController').except(['store']);
+  Route.resource('/bets', 'BetsController');
 }).middleware('auth')
