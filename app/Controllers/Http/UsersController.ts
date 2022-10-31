@@ -21,14 +21,17 @@ export default class UsersController {
     let newUser: User;
     try {
       newUser = await User.create(requestBody, trx);
+      await trx.commit();
     } catch (error) {
       await trx.rollback();
       return response.badRequest(error);
     }
+
     try {
       const player = await Role.findBy('name', 'player', trx)
       if (player === null) throw new Error();
       if (player) newUser.related('roles').attach([player.id])
+      await trx.commit();
     } catch (error) {
       await trx.rollback();
       return response.badRequest(error);
@@ -38,14 +41,37 @@ export default class UsersController {
       const user = await User.query().where('email', newUser.email).preload('roles').first();
       return response.created(user)
     } catch (error) {
-      await trx.rollback();
       return response.badRequest(error)
     }
   }
 
   public async show({ }: HttpContextContract) { }
 
-  public async update({ }: HttpContextContract) { }
+  public async update({ request, params, response }: HttpContextContract) {
+    const userSecureId = params.id;
+    const requestBody = request.only(["name", "email", "password"]);
+    const trx = await Database.beginGlobalTransaction();
+
+    let updatedUser: User;
+    try {
+      updatedUser = await User.findByOrFail('secure_id', userSecureId);
+      updatedUser.useTransaction(trx);
+      response.send(updatedUser)
+      await updatedUser.merge(requestBody).save();
+    } catch (error) {
+      await trx.rollback();
+      return response.badRequest(error);
+    }
+
+    try {
+      const user = await User.query().where('email', updatedUser.email).preload('roles').first();
+      trx.commit();
+      return response.ok(user)
+    } catch (error) {
+      await trx.rollback();
+      return response.badRequest(error)
+    }
+  }
 
   public async destroy({ }: HttpContextContract) { }
 }
