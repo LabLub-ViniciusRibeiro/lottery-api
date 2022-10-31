@@ -40,10 +40,12 @@ Route.get('/test-auth', ({ response }) => {
 Route.group(() => {
   Route.post('/login', 'AuthController.login');
   Route.post('/users', 'UsersController.store');
+  Route.resource('/games', 'GamesController').only(['index', 'show']);
 })
 
 // authenticated routes
 Route.group(() => {
   Route.resource('/users', 'UsersController').except(['store']);
   Route.resource('/bets', 'BetsController');
+  Route.resource('/games', 'GamesController').except(['index', 'show']);
 }).middleware('auth')
