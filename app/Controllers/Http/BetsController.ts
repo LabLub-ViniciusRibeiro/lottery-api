@@ -15,7 +15,8 @@ export default class BetsController {
     try {
       const bets = await Bet.query()
         .where('user_id', auth.user?.id as number)
-        .preload('game');
+        .preload('game', (game) => game.select(['type', 'color']))
+        .preload('user', (user) => user.select(['name', 'email']));
       return response.send(bets)
     } catch (error) {
       return response.badRequest({ message: error.message })

@@ -4,7 +4,8 @@ import Role from 'App/Models/Role';
 import User from 'App/Models/User'
 
 export default class UsersController {
-  public async index({ response }: HttpContextContract) {
+  public async index({ bouncer, response }: HttpContextContract) {
+    await bouncer.authorize('is adm')
     try {
       const users = await User.query().preload('roles', roles => roles.select('name'));
       return response.ok(users)
@@ -45,7 +46,11 @@ export default class UsersController {
     }
   }
 
-  public async show({ params, response }: HttpContextContract) {
+  public async show({ auth, params, response }: HttpContextContract) {
+    const userSecureId = params.id;
+    const userAuthenticated = auth.user;
+    if (userSecureId !== userAuthenticated?.secureId)
+      throw new Error('You are not authorized to see this user info');
     try {
       const user = await User
         .query()
@@ -67,8 +72,13 @@ export default class UsersController {
 
   }
 
-  public async update({ request, params, response }: HttpContextContract) {
+  public async update({ auth, request, params, response }: HttpContextContract) {
     const userSecureId = params.id;
+    const userAuthenticated = auth.user;
+
+    if (userSecureId !== userAuthenticated?.secureId)
+      throw new Error('You are not authorized to see this user info');
+      
     const requestBody = request.only(["name", "email", "password"]);
     const trx = await Database.beginGlobalTransaction();
 

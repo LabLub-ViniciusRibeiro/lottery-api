@@ -11,7 +11,10 @@ export default class GamesController {
     }
   }
 
-  public async store({ request, response }: HttpContextContract) {
+  public async store({ request, bouncer, response }: HttpContextContract) {
+
+    await bouncer.authorize('is adm');
+
     const gameStoreRequest = request.only(['type', 'description', 'range', 'price', 'min_max_number', 'color']);
     try {
       const game = await Game.create(gameStoreRequest);
@@ -31,7 +34,10 @@ export default class GamesController {
     }
   }
 
-  public async update({ request, params, response }: HttpContextContract) {
+  public async update({ request, params, bouncer, response }: HttpContextContract) {
+
+    await bouncer.authorize('is adm');
+
     const gameUpdateRequest = request.only(['type', 'description', 'range', 'price', 'min_max_number', 'color']);
     const gameId = params.id;
     try {
@@ -43,7 +49,10 @@ export default class GamesController {
     }
   }
 
-  public async destroy({ params, response }: HttpContextContract) {
+  public async destroy({ params, bouncer, response }: HttpContextContract) {
+
+    await bouncer.authorize('is adm');
+
     const gameId = params.id;
     try {
       await Game.query().where('id', gameId).delete();
