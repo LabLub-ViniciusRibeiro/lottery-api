@@ -6,7 +6,7 @@ import User from 'App/Models/User'
 export default class UsersController {
   public async index({ response }: HttpContextContract) {
     try {
-      const users = await User.all();
+      const users = await User.query().preload('roles', roles => roles.select('name'));
       return response.ok(users)
     } catch (error) {
       return response.notFound({ error })
@@ -52,7 +52,7 @@ export default class UsersController {
         .where('secure_id', params.id)
         .preload('bets', (bets) => {
           const today = new Date();
-          today.setMonth(today.getMonth()-1);
+          today.setMonth(today.getMonth() - 1);
           const formated = today.toLocaleDateString('en-US').replace(/\//g, '-');
           bets.where('created_at', '>', formated);
         })
@@ -93,5 +93,13 @@ export default class UsersController {
     }
   }
 
-  public async destroy({ }: HttpContextContract) { }
+  public async destroy({ params, response }: HttpContextContract) {
+    try {
+      const user = await User.findByOrFail('secure_id', params.id);
+      await user.delete();
+      response.ok({ message: 'User deleted!' });
+    } catch (error) {
+      response.ok({ message: 'Error deleting user', originalMessage: error.message });
+    }
+  }
 }
