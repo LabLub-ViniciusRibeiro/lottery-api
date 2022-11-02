@@ -47,8 +47,16 @@ export default class UsersController {
 
   public async show({ params, response }: HttpContextContract) {
     try {
-      const user = await User.query().where('secure_id', params.id)
-        .preload('bets').first();
+      const user = await User
+        .query()
+        .where('secure_id', params.id)
+        .preload('bets', (bets) => {
+          const today = new Date();
+          today.setMonth(today.getMonth()-1);
+          const formated = today.toLocaleDateString('en-US').replace(/\//g, '-');
+          bets.where('created_at', '>', formated);
+        })
+        .first();
       if (!user) {
         throw new Error('User not found')
       }
