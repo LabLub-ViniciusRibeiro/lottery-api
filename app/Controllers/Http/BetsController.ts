@@ -1,5 +1,14 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import Bet from 'App/Models/Bet'
+import Cart from 'App/Models/Cart';
+import Game from 'App/Models/Game';
+import User from 'App/Models/User';
+
+
+interface IBetsRequest {
+  gameId: number,
+  chosenNumbers: number[],
+}
 
 export default class BetsController {
   public async index({ auth, response }: HttpContextContract) {
@@ -10,19 +19,46 @@ export default class BetsController {
   }
 
   public async store({ auth, request, response }: HttpContextContract) {
-    const requestBody = request.only(['game_id', 'chosen_numbers']);
-    requestBody.chosen_numbers = JSON.stringify(requestBody.chosen_numbers);
-    const userSecureId = auth.user?.secureId;
-
+    const { bets }: { bets: IBetsRequest[] } = request.only(['bets']);
+    
     try {
-      const bet = await Bet.create({ userId: userSecureId, ...requestBody });
-      return response.created(bet)
+      const cart = await Cart.query().select('min_value').first();
+      const minCartValue = cart?.minValue;
+      const user = await User.findByOrFail('secure_id', auth.user?.secureId);
+      const prices = await Promise.all(bets.map(async (bet) => {
+        const game = await Game.findByOrFail('id', bet.gameId);
+        if (bet.chosenNumbers.length !== game.minMaxNumber) {
+          return response
+            .badRequest({ message: `For the game ${game.type} you should choose ${game.minMaxNumber} numbers` })
+        }
+
+        bet.chosenNumbers.forEach(num => {
+          if (num < 1 || num > game.range) {
+            return response
+              .badRequest({ message: `For the game ${game.type} you should choose numbers between 0 and ${game.range}` })
+          }
+        })
+        return game.price;
+      }));
+      const totalCart = prices.reduce((previous, current) => (previous as number) + (current as number));
+      if (totalCart < (minCartValue as number)) {
+        return response.badRequest({ message: "Min cart value not reached", minValue: minCartValue })
+      }
+      const betsToSave = bets.map(bet => ({
+        gameId: bet.gameId,
+        userId: user.secureId,
+        chosen_numbers: bet.chosenNumbers.join(', ')
+      }));
+
+      const betsCreated = await Bet.createMany(betsToSave);
+      response.created(betsCreated)
+
     } catch (error) {
-      return response.badRequest(error)
+      return response.badRequest({ originalError: error.message });
     }
   }
 
-  public async show({ auth, request, params, response }: HttpContextContract) {
+  public async show({ auth, params, response }: HttpContextContract) {
     const userSecureId = auth.user?.secureId;
     const betSecureId = params.id;
     try {
