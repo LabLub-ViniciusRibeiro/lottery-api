@@ -45,7 +45,19 @@ export default class UsersController {
     }
   }
 
-  public async show({ }: HttpContextContract) { }
+  public async show({ params, response }: HttpContextContract) {
+    try {
+      const user = await User.query().where('secure_id', params.id)
+        .preload('bets').first();
+      if (!user) {
+        throw new Error('User not found')
+      }
+      response.ok(user);
+    } catch (error) {
+      response.notFound({ message: error.message });
+    }
+
+  }
 
   public async update({ request, params, response }: HttpContextContract) {
     const userSecureId = params.id;

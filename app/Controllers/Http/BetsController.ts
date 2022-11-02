@@ -12,15 +12,19 @@ interface IBetsRequest {
 
 export default class BetsController {
   public async index({ auth, response }: HttpContextContract) {
-    const bets = await Bet.query()
-      .where('user_id', auth.user?.secureId as string)
-      .preload('game');
-    return response.send(bets)
+    try {
+      const bets = await Bet.query()
+        .where('user_id', auth.user?.id as number)
+        .preload('game');
+      return response.send(bets)
+    } catch (error) {
+      return response.badRequest({ message: error.message })
+    }
   }
 
   public async store({ auth, request, response }: HttpContextContract) {
     const { bets }: { bets: IBetsRequest[] } = request.only(['bets']);
-    
+
     try {
       const cart = await Cart.query().select('min_value').first();
       const minCartValue = cart?.minValue;
@@ -46,7 +50,7 @@ export default class BetsController {
       }
       const betsToSave = bets.map(bet => ({
         gameId: bet.gameId,
-        userId: user.secureId,
+        userId: user.id,
         chosen_numbers: bet.chosenNumbers.join(', ')
       }));
 
@@ -59,11 +63,11 @@ export default class BetsController {
   }
 
   public async show({ auth, params, response }: HttpContextContract) {
-    const userSecureId = auth.user?.secureId;
+    const userId = auth.user?.id;
     const betSecureId = params.id;
     try {
       const bet = await Bet.query()
-        .where('user_id', userSecureId as string)
+        .where('user_id', userId as number)
         .where('secure_id', betSecureId)
         .preload('game')
         .first();

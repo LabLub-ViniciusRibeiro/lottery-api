@@ -8,9 +8,10 @@ export default class extends BaseSchema {
       table.increments('id')
       table.uuid('secure_id').notNullable().unique()
       table
-        .uuid('user_id')
+        .integer('user_id')
+        .unsigned()
         .notNullable()
-        .references("secure_id")
+        .references("id")
         .inTable("users")
         .onDelete('CASCADE')
       table
