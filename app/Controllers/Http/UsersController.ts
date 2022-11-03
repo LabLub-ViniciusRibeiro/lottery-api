@@ -3,6 +3,8 @@ import Database from '@ioc:Adonis/Lucid/Database';
 import Role from 'App/Models/Role';
 import User from 'App/Models/User'
 import { sendWelcomeMail } from 'App/Services/sendMail';
+import StoreValidator from 'App/Validators/User/StoreValidator';
+import UpdateValidator from 'App/Validators/User/UpdateValidator';
 
 export default class UsersController {
   public async index({ bouncer, response }: HttpContextContract) {
@@ -16,10 +18,11 @@ export default class UsersController {
   }
 
   public async store({ request, response }: HttpContextContract) {
+    await request.validate(StoreValidator);
     const requestBody = request.only(["name", "email", "password"]);
-
+    
     const trx = await Database.beginGlobalTransaction();
-
+    
     let newUser: User;
     try {
       newUser = await User.create(requestBody, trx);
@@ -80,6 +83,7 @@ export default class UsersController {
   }
 
   public async update({ auth, request, params, response }: HttpContextContract) {
+    await request.validate(UpdateValidator);
     const userSecureId = params.id;
     const userAuthenticated = auth.user;
 

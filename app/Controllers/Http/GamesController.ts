@@ -1,5 +1,7 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import Game from 'App/Models/Game'
+import StoreValidator from 'App/Validators/Game/StoreValidator';
+import UpdateValidator from 'App/Validators/Game/UpdateValidator';
 
 export default class GamesController {
   public async index({ response }: HttpContextContract) {
@@ -12,6 +14,7 @@ export default class GamesController {
   }
 
   public async store({ request, bouncer, response }: HttpContextContract) {
+    await request.validate(StoreValidator);
 
     await bouncer.authorize('is adm');
 
@@ -35,7 +38,7 @@ export default class GamesController {
   }
 
   public async update({ request, params, bouncer, response }: HttpContextContract) {
-
+    await request.validate(UpdateValidator);
     await bouncer.authorize('is adm');
 
     const gameUpdateRequest = request.only(['type', 'description', 'range', 'price', 'min_max_number', 'color']);

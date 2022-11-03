@@ -4,6 +4,7 @@ import Cart from 'App/Models/Cart';
 import Game from 'App/Models/Game';
 import User from 'App/Models/User';
 import { sendNewBetMail } from 'App/Services/sendMail';
+import StoreValidator from 'App/Validators/Bet/StoreValidator';
 
 
 interface IBetsRequest {
@@ -25,6 +26,7 @@ export default class BetsController {
   }
 
   public async store({ auth, request, response }: HttpContextContract) {
+    await request.validate(StoreValidator)
     const { bets }: { bets: IBetsRequest[] } = request.only(['bets']);
     let betsCreated: Bet[]
     try {
