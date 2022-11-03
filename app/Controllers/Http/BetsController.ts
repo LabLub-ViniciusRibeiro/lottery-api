@@ -15,7 +15,6 @@ interface IBetsRequest {
 export default class BetsController {
   public async index({ auth, request, response }: HttpContextContract) {
     const { ...inputs } = request.qs();
-    console.log(inputs)
     try {
       const bets = await Bet.query()
         .where('user_id', auth.user?.id as number)
@@ -93,9 +92,8 @@ export default class BetsController {
         throw new Error("This bet doesn't exist or doesn't belog to this user")
       }
 
-      return response.ok(bet)
+      return response.ok(bet);
     } catch (error) {
-      console.log(error)
       return response.notFound({ errorMessage: error.message });
     }
   }
