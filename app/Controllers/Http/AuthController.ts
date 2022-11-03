@@ -1,6 +1,7 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import Env from '@ioc:Adonis/Core/Env'
 import User from 'App/Models/User';
+import { sendRecoverPasswordMail } from 'App/Services/sendMail';
 
 const EXPIRES_IN = Env.get('NODE_ENV') === 'development' ? '' : '30mins'
 
@@ -15,6 +16,15 @@ export default class AuthController {
         } catch (error) {
             return response.forbidden({ message: "Invalid credentials", error: error });
         }
-
     }
+
+    // public async recoverPassword({ auth, response }: HttpContextContract) {
+    //     const user = auth.user;
+        
+    //     try {
+    //         await sendRecoverPasswordMail(user as User, 'email/recover');
+    //     } catch (error) {
+
+    //     }
+    // }
 }

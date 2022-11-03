@@ -3,6 +3,7 @@ import Bet from 'App/Models/Bet'
 import Cart from 'App/Models/Cart';
 import Game from 'App/Models/Game';
 import User from 'App/Models/User';
+import { sendNewBetMail } from 'App/Services/sendMail';
 
 
 interface IBetsRequest {
@@ -25,7 +26,7 @@ export default class BetsController {
 
   public async store({ auth, request, response }: HttpContextContract) {
     const { bets }: { bets: IBetsRequest[] } = request.only(['bets']);
-
+    let betsCreated: Bet[]
     try {
       const cart = await Cart.query().select('min_value').first();
       const minCartValue = cart?.minValue;
@@ -55,11 +56,21 @@ export default class BetsController {
         chosen_numbers: bet.chosenNumbers.join(', ')
       }));
 
-      const betsCreated = await Bet.createMany(betsToSave);
+      betsCreated = await Bet.createMany(betsToSave);
       response.created(betsCreated)
 
     } catch (error) {
       return response.badRequest({ originalError: error.message });
+    }
+
+    try {
+      const betsToDisplay = await Promise.all(bets.map(async bet => {
+        const game = await Game.findBy('id', bet.gameId);
+        return (`|Choosen numbers: ${bet.chosenNumbers}, game: ${game?.type}| `);
+      }));
+      await sendNewBetMail(auth.user as User, betsToDisplay.join(', '), 'email/newBet');
+    } catch (error) {
+      response.badRequest({ message: 'Error sending new bets mail', originalMessage: error.message });
     }
   }
 

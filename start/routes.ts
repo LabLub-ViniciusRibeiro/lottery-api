@@ -20,6 +20,7 @@
 
 import Route from '@ioc:Adonis/Core/Route'
 import Database from '@ioc:Adonis/Lucid/Database'
+import User from 'App/Models/User';
 
 Route.get('/test-health', async ({ response }) => {
   const health = await Database.report();
@@ -40,6 +41,7 @@ Route.get('/test-auth', ({ response }) => {
 Route.group(() => {
   Route.post('/login', 'AuthController.login');
   Route.post('/users', 'UsersController.store');
+  Route.post('/recover_password', 'AuthController.recoverPassword');
   Route.resource('/games', 'GamesController').only(['index', 'show']).apiOnly();
 })
 

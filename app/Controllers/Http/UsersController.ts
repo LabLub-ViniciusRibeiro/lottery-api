@@ -2,6 +2,7 @@ import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import Database from '@ioc:Adonis/Lucid/Database';
 import Role from 'App/Models/Role';
 import User from 'App/Models/User'
+import { sendWelcomeMail } from 'App/Services/sendMail';
 
 export default class UsersController {
   public async index({ bouncer, response }: HttpContextContract) {
@@ -22,7 +23,6 @@ export default class UsersController {
     let newUser: User;
     try {
       newUser = await User.create(requestBody, trx);
-      await trx.commit();
     } catch (error) {
       await trx.rollback();
       return response.badRequest(error);
@@ -32,17 +32,24 @@ export default class UsersController {
       const player = await Role.findBy('name', 'player', trx)
       if (player === null) throw new Error();
       if (player) newUser.related('roles').attach([player.id])
-      await trx.commit();
     } catch (error) {
       await trx.rollback();
       return response.badRequest(error);
     }
+    let user: User | null;
+    try {
+      user = await User.query().where('email', newUser.email).preload('roles').first();
+      response.created(user);
+    } catch (error) {
+      return response.badRequest(error);
+    }
 
     try {
-      const user = await User.query().where('email', newUser.email).preload('roles').first();
-      return response.created(user)
+      await sendWelcomeMail(user as User, 'email/welcome');
+      trx.commit();
     } catch (error) {
-      return response.badRequest(error)
+      trx.rollback();
+      return response.badRequest({ message: 'Error sending welcome email', original: error.message });
     }
   }
 
