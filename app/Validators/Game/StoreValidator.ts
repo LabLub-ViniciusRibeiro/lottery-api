@@ -15,7 +15,7 @@ export default class StoreValidator extends CustomMessages {
       rules.required(), rules.unsigned()]),
     price: schema.number([
       rules.required(), rules.unsigned()]),
-    minMaxNumber: schema.number(
+    min_max_number: schema.number(
       [rules.required(), rules.unsigned()]),
     color: schema.string([rules.required()])
   })

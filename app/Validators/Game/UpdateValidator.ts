@@ -17,14 +17,14 @@ export default class UpdateValidator extends CustomMessages {
         table: 'games', column: 'type', whereNot: {
           id: this.refs.id
         }
-      }), rules.required()]),
-    description: schema.string.optional([rules.required()]),
+      })]),
+    description: schema.string.optional(),
     range: schema.number.optional([
-      rules.required(), rules.unsigned()]),
+      rules.unsigned()]),
     price: schema.number.optional([
-      rules.required(), rules.unsigned()]),
-    minMaxNumber: schema.number.optional(
-      [rules.required(), rules.unsigned()]),
-    color: schema.string.optional([rules.required()])
+      rules.unsigned()]),
+    min_max_number: schema.number.optional(
+      [rules.unsigned()]),
+    color: schema.string.optional()
   })
 }
