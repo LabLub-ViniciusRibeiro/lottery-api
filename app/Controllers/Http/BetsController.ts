@@ -13,12 +13,15 @@ interface IBetsRequest {
 }
 
 export default class BetsController {
-  public async index({ auth, response }: HttpContextContract) {
+  public async index({ auth, request, response }: HttpContextContract) {
+    const { ...inputs } = request.qs();
+    console.log(inputs)
     try {
       const bets = await Bet.query()
         .where('user_id', auth.user?.id as number)
         .preload('game', (game) => game.select(['type', 'color']))
-        .preload('user', (user) => user.select(['name', 'email']));
+        .preload('user', (user) => user.select(['name', 'email']))
+        .whereHas('game', scope => scope.filter(inputs.type));
       return response.send(bets)
     } catch (error) {
       return response.badRequest({ message: error.message })

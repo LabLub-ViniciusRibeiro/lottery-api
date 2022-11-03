@@ -5,6 +5,7 @@ import { v4 as uuidv4 } from 'uuid'
 import Game from './Game'
 
 export default class Bet extends BaseModel {
+
   @column({ isPrimary: true })
   public id: number
 

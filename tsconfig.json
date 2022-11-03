@@ -34,7 +34,8 @@
       "@adonisjs/bouncer",
       "@adonisjs/mail",
       "@adonisjs/view",
-      "adonis5-scheduler"
+      "adonis5-scheduler",
+      "adonis-lucid-filter"
     ]
   }
 }

@@ -1,7 +1,13 @@
 import { DateTime } from 'luxon'
 import { BaseModel, column } from '@ioc:Adonis/Lucid/Orm'
+import { compose } from '@ioc:Adonis/Core/Helpers'
+import { Filterable } from '@ioc:Adonis/Addons/LucidFilter'
+import GameFilter from './Filters/GameFilter'
 
-export default class Game extends BaseModel {
+export default class Game extends compose(BaseModel, Filterable) {
+
+  public static $filter = () => GameFilter
+
   @column({ isPrimary: true })
   public id: number
 
