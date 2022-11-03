@@ -26,7 +26,7 @@
     "@adonisjs/mail": "^8.1.2",
     "@adonisjs/repl": "^3.1.11",
     "@adonisjs/view": "^6.2.0",
-    "crypto": "^1.0.1",
+    "adonis5-scheduler": "^2.0.2",
     "luxon": "^3.0.4",
     "mysql2": "^2.3.3",
     "phc-argon2": "^1.1.3",

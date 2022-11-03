@@ -32,7 +32,7 @@ export default class AuthController {
         }
     }
 
-    public async updatePassword({ params, request, response }: HttpContextContract) {
+    public async recoverPassword({ params, request, response }: HttpContextContract) {
         const { password } = request.only(['password']);
         const { token } = params;
 

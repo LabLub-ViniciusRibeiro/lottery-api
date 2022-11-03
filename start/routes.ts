@@ -21,7 +21,7 @@ Route.group(() => {
   Route.post('/login', 'AuthController.login');
   Route.post('/users', 'UsersController.store');
   Route.post('/recover_password', 'AuthController.generateRecoverPasswordToken');
-  Route.patch('/recover_password/:token', 'AuthController.updatePassword');
+  Route.patch('/recover_password/:token', 'AuthController.recoverPassword');
   Route.resource('/games', 'GamesController').only(['index', 'show']).apiOnly();
 })
 

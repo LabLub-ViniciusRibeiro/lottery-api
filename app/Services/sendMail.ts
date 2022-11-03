@@ -30,3 +30,13 @@ export async function sendNewBetMail(user: User, bets: string, template: string)
             .htmlView(template, { user, bets });
     })
 }
+
+export async function sendScheduleMail(user: User, template: string) {
+    await Mail.send(message => {
+        message
+            .from('admin@lottery.com')
+            .to(user.email)
+            .subject("We miss you!")
+            .htmlView(template, { user });
+    })
+}
