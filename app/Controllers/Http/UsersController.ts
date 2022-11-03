@@ -7,10 +7,20 @@ import StoreValidator from 'App/Validators/User/StoreValidator';
 import UpdateValidator from 'App/Validators/User/UpdateValidator';
 
 export default class UsersController {
-  public async index({ bouncer, response }: HttpContextContract) {
-    await bouncer.authorize('is adm')
+  public async index({ bouncer, request, response }: HttpContextContract) {
+    await bouncer.authorize('is adm');
+    const { page, perPage, noPaginate } = request.qs();
     try {
-      const users = await User.query().preload('roles', roles => roles.select('name'));
+      if (noPaginate) {
+        const users = await User
+          .query()
+          .preload('roles', roles => roles.select('name'))
+        return response.ok(users)
+      }
+      const users = await User
+        .query()
+        .preload('roles', roles => roles.select('name'))
+        .paginate(page || 1, perPage || 10);
       return response.ok(users)
     } catch (error) {
       return response.notFound({ error })
@@ -20,9 +30,9 @@ export default class UsersController {
   public async store({ request, response }: HttpContextContract) {
     await request.validate(StoreValidator);
     const requestBody = request.only(["name", "email", "password"]);
-    
+
     const trx = await Database.beginGlobalTransaction();
-    
+
     let newUser: User;
     try {
       newUser = await User.create(requestBody, trx);
@@ -89,7 +99,7 @@ export default class UsersController {
 
     if (userSecureId !== userAuthenticated?.secureId)
       throw new Error('You are not authorized to see this user info');
-      
+
     const requestBody = request.only(["name", "email", "password"]);
     const trx = await Database.beginGlobalTransaction();
 
