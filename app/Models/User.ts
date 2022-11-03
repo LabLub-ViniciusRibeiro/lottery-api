@@ -13,7 +13,7 @@ export default class User extends BaseModel {
   public secureId: string
 
   @column({ serializeAs: null })
-  public rememberMeToken?: string
+  public rememberMeToken?: string | null
 
   @column()
   public name: string

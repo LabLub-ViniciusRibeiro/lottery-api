@@ -1,26 +1,5 @@
-/*
-|--------------------------------------------------------------------------
-| Routes
-|--------------------------------------------------------------------------
-|
-| This file is dedicated for defining HTTP routes. A single file is enough
-| for majority of projects, however you can define routes in different
-| files and just make sure to import them inside this file. For example
-|
-| Define routes in following two files
-| ├── start/routes/cart.ts
-| ├── start/routes/customer.ts
-|
-| and then import them inside `start/routes.ts` as follows
-|
-| import './routes/cart'
-| import './routes/customer'
-|
-*/
-
 import Route from '@ioc:Adonis/Core/Route'
 import Database from '@ioc:Adonis/Lucid/Database'
-import User from 'App/Models/User';
 
 Route.get('/test-health', async ({ response }) => {
   const health = await Database.report();
@@ -41,7 +20,8 @@ Route.get('/test-auth', ({ response }) => {
 Route.group(() => {
   Route.post('/login', 'AuthController.login');
   Route.post('/users', 'UsersController.store');
-  Route.post('/recover_password', 'AuthController.recoverPassword');
+  Route.post('/recover_password', 'AuthController.generateRecoverPasswordToken');
+  Route.patch('/recover_password/:token', 'AuthController.updatePassword');
   Route.resource('/games', 'GamesController').only(['index', 'show']).apiOnly();
 })
 

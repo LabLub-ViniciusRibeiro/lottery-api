@@ -18,13 +18,31 @@ export default class AuthController {
         }
     }
 
-    // public async recoverPassword({ auth, response }: HttpContextContract) {
-    //     const user = auth.user;
-        
-    //     try {
-    //         await sendRecoverPasswordMail(user as User, 'email/recover');
-    //     } catch (error) {
+    public async generateRecoverPasswordToken({ auth, request, response }: HttpContextContract) {
+        const { email } = request.only(['email']);
 
-    //     }
-    // }
+        try {
+            const user = await User.findByOrFail('email', email);
+            const { tokenHash } = await auth.use('api').generate(user);
+            user.merge({ rememberMeToken: tokenHash }).save();
+            await sendRecoverPasswordMail(user, tokenHash, 'email/recover');
+            return response.ok({ message: 'Token created successfully' });
+        } catch (error) {
+            return response.badRequest({ message: 'Error sending recover email', originalMessage: error.message });
+        }
+    }
+
+    public async updatePassword({ params, request, response }: HttpContextContract) {
+        const { password } = request.only(['password']);
+        const { token } = params;
+
+        try {
+            const user = await User.findByOrFail('remember_me_token', token);
+            user.merge({ password: password }).save();
+            user.merge({ rememberMeToken: null }).save();
+            return response.ok({ message: 'Password updated!' });
+        } catch (error) {
+            return response.notFound({ message: 'Error updating password', originalMessage: error.message });
+        }
+    }
 }
