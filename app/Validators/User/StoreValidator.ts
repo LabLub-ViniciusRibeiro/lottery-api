@@ -8,10 +8,11 @@ export default class StoreValidator extends CustomMessages {
   }
 
   public schema = schema.create({
-    name: schema.string({ trim: true }, [rules.regex(/^[ a-zA-ZÀ-ÿ\u00f1\u00d1]*$/g), rules.required()]),
+    name: schema.string({ trim: true }, [rules.regex(/^[ a-zA-ZÀ-ÿ\u00f1\u00d1]*$/g)]),
     email: schema.string({}, [
       rules.email(),
-      rules.unique({ table: 'users', column: 'email', caseInsensitive: true }),
-    ])
+      rules.unique({ table: 'users', column: 'email', caseInsensitive: true })
+    ]),
+    password: schema.string([rules.minLength(4)])
   })
 }

@@ -7,7 +7,10 @@ export default class GamesController {
   public async index({ response }: HttpContextContract) {
     try {
       const games = await Game.all();
-      return response.ok(games)
+      if (games.length === 0) {
+        return response.notFound({ message: 'There are no games to show' });
+      }
+      return response.ok(games.sort((a, b) => a.id - b.id))
     } catch (error) {
       return response.notFound(error.message)
     }
