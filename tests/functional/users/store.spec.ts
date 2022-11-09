@@ -40,4 +40,12 @@ test.group('store user', () => {
             }]
         })
     })
+
+    test('should create a new user', async ({ client, route }) => {
+        const response = await client
+            .post(route('UsersController.store'))
+            .json({ name: 'Test', email: 'test@email.com', password: 'test' })
+        response.dumpBody()
+        response.assertStatus(201);
+    })
 })

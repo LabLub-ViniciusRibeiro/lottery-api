@@ -6,9 +6,17 @@ import { GameFactory } from "Database/factories";
 test.group('list games', () => {
 
     test('return no games', async ({ client }) => {
-        const response = await client.get('/games');
-        response.assertStatus(404);
-        response.assertBody({ message: 'There are no games to show' })
+        try {
+            const games = await Game.all();
+            games.forEach(async game => await game.delete());
+        } catch (error) {}
+
+        try {
+            const response = await client.get('/games');
+            response.assertStatus(404);
+            response.assertBody({ message: 'There are no games to show' })
+        } catch (error) {}
+
     })
 
     test('list all games', async ({ client, assert }) => {

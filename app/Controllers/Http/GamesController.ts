@@ -61,9 +61,13 @@ export default class GamesController {
 
     const gameId = params.id;
     try {
-      await Game.query().where('id', gameId).delete();
+      const game = await Game.query().where('id', gameId).firstOrFail();
+      await game.delete();
       return response.ok({ message: "Game deleted!" });
     } catch (error) {
+      if (error.status === 404) {
+        return response.notFound({ message: 'Game not found', originalMessage: error.message });
+      }
       return response.badRequest({ message: 'Error deleting user', originalMessage: error.message })
     }
   }

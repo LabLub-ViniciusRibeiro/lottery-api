@@ -54,7 +54,7 @@ export default class UsersController {
       user = await User.query().where('email', newUser.email).preload('roles').first();
       response.created(user);
     } catch (error) {
-      return response.badRequest(error);
+      return response.badRequest({ message: 'error creating user', originalError: error.message });
     }
 
     try {
