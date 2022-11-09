@@ -9,9 +9,20 @@ test.group('store game', () => {
         response.assertBody({ errors: [{ message: 'E_UNAUTHORIZED_ACCESS: Unauthorized access' }] });
     });
 
-    // test('require type', async ({ client }) => {
-    //     const user = await User.findBy('email', 'admin@email.com');
-    //     const result = await client.post('/games').loginAs(user as User);
-    //     result.dumpBody();
-    // })
+    test('create new game', async ({ client }) => {
+        const user = await User.findBy('email', 'admin@email.com')
+        const response = await client
+            .post('/games')
+            .form({
+                type: "Lotomania",
+                description: "Escolha 6 números",
+                min_max_number: 3,
+                range: 15,
+                price: 7.50,
+                color: "#2ca834"
+            })
+            .loginAs(user as User);
+        response.assertStatus(201);
+        response.assertBodyContains(response.body())
+    })
 })
