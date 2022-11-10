@@ -56,7 +56,6 @@ export default class GamesController {
   }
 
   public async destroy({ params, bouncer, response }: HttpContextContract) {
-
     await bouncer.authorize('is adm');
 
     const gameId = params.id;
