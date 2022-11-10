@@ -1,7 +1,16 @@
+import Database from "@ioc:Adonis/Lucid/Database";
 import { test } from "@japa/runner";
 import User from "App/Models/User";
 
-test.group('store game', () => {
+test.group('store game', (group) => {
+
+    group.tap(test => test.tags(['@games_store']));
+
+    group.each.setup(async () => {
+        await Database.beginGlobalTransaction()
+        return () => Database.rollbackGlobalTransaction()
+      })
+
     test('require authentication', async ({ client, route }) => {
         const response = await client.post(route('GamesController.store'))
         response.assertStatus(401);

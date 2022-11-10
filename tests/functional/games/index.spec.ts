@@ -1,9 +1,17 @@
+import Database from "@ioc:Adonis/Lucid/Database";
 import { test } from "@japa/runner";
 import Game from "App/Models/Game";
 import { GameFactory } from "Database/factories";
 
 
-test.group('list games', () => {
+test.group('list games', (group) => {
+
+    group.tap(test => test.tags(['@games_index']));
+
+    group.each.setup(async () => {
+        await Database.beginGlobalTransaction()
+        return () => Database.rollbackGlobalTransaction()
+      })
 
     test('return no games', async ({ client }) => {
         try {

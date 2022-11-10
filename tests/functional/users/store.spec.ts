@@ -1,6 +1,15 @@
+import Database from "@ioc:Adonis/Lucid/Database";
 import { test } from "@japa/runner";
 
-test.group('store user', () => {
+test.group('store user', (group) => {
+
+    group.tap(test => test.tags(['@users_store']));
+
+    group.each.setup(async () => {
+        await Database.beginGlobalTransaction()
+        return () => Database.rollbackGlobalTransaction()
+      })
+
     test('require name', async ({ client, route }) => {
         const response = await client.post(route('UsersController.store')).form({ email: 'test@email.com', password: 'test' });
         response.assertStatus(422);
@@ -45,7 +54,6 @@ test.group('store user', () => {
         const response = await client
             .post(route('UsersController.store'))
             .json({ name: 'Test', email: 'test@email.com', password: 'test' })
-        response.dumpBody()
         response.assertStatus(201);
     })
 })
