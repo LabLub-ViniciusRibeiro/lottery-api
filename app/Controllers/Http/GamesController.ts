@@ -45,11 +45,15 @@ export default class GamesController {
     await bouncer.authorize('is adm');
 
     const gameUpdateRequest = request.only(['type', 'description', 'range', 'price', 'min_max_number', 'color']);
+    const { color, description, min_max_number, price, range, type  } = gameUpdateRequest;
+    if (!color && !description && !min_max_number && !price && !range && !type) {
+      return response.badRequest({ message: 'No property updated' });
+    }
     const gameId = params.id;
     try {
       const game = await Game.findByOrFail('id', gameId);
       const updatedGame = await game.merge(gameUpdateRequest).save();
-      return response.created(updatedGame);
+      return response.ok(updatedGame);
     } catch (error) {
       return response.badRequest(error.message)
     }

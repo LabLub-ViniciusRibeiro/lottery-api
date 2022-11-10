@@ -31,7 +31,7 @@ export default class UsersController {
     await request.validate(StoreValidator);
     const requestBody = request.only(["name", "email", "password"]);
 
-    const trx = await Database.beginGlobalTransaction();
+    const trx = await Database.transaction();
 
     let newUser: User;
     try {
@@ -101,7 +101,7 @@ export default class UsersController {
       throw new Error('You are not authorized to see this user info');
 
     const requestBody = request.only(["name", "email", "password"]);
-    const trx = await Database.beginGlobalTransaction();
+    const trx = await Database.transaction();
 
     let updatedUser: User;
     try {

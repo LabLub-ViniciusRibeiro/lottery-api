@@ -11,7 +11,7 @@ test.group('create bets', (group) => {
     group.each.setup(async () => {
         await Database.beginGlobalTransaction()
         return () => Database.rollbackGlobalTransaction()
-      })
+    })
 
     test('return error if not authenticated', async ({ client, route }) => {
         const response = await client
@@ -40,16 +40,40 @@ test.group('create bets', (group) => {
         const response = await client
             .post(route('BetsController.store'))
             .json({
-                bets: [{
-                    gameId: 1,
-                    chosenNumbers: [1, 2, 3, 4, 5, 6]
-                }]
+                bets: betsArray
             }).loginAs(user);
         response.assertStatus(400);
-        // response.assertBodyContains({
-        //     message: "Min cart value not reached",
-        //     minValue: minValue,
-        //     currentValue: total
-        // })
+        response.assertBodyContains({
+            message: "Min cart value not reached",
+            minValue: minValue,
+            currentValue: total
+        })
+    })
+
+    test('create bets successfully', async ({ client, route }) => {
+        const user = await User.findBy('email', 'player@email.com') as User;
+        const betsArray = [{
+            gameId: 1,
+            chosenNumbers: [1, 2, 3, 4, 5, 6]
+        },
+        {
+            gameId: 1,
+            chosenNumbers: [1, 2, 3, 4, 5, 6]
+        },
+        {
+            gameId: 1,
+            chosenNumbers: [1, 2, 3, 4, 5, 6]
+        },
+        {
+            gameId: 1,
+            chosenNumbers: [1, 2, 3, 4, 5, 6]
+        }];
+        const response = await client
+            .post(route('BetsController.store'))
+            .json({
+                bets: betsArray
+            }).loginAs(user);
+        response.assertStatus(201);
+        response.assertBodyContains(response.body());
     })
 })

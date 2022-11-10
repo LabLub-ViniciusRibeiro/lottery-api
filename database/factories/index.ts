@@ -1,4 +1,5 @@
 import Factory from '@ioc:Adonis/Lucid/Factory'
+import Bet from 'App/Models/Bet'
 import Game from 'App/Models/Game'
 import User from 'App/Models/User'
 
@@ -20,3 +21,11 @@ export const GameFactory = Factory.define(Game, ({ faker }) => {
         color: faker.color.rgb()
     })
 }).build()
+
+// export const BetFactory = Factory.define(Bet, ({ faker }) => {
+//     const games = 
+//     return ({
+//         gameId: 1,
+//         chosenNumbers: 
+//     })
+// })
