@@ -107,8 +107,8 @@ export default class UsersController {
     try {
       updatedUser = await User.findByOrFail('secure_id', userSecureId);
       updatedUser.useTransaction(trx);
-      response.send(updatedUser)
       await updatedUser.merge(requestBody).save();
+      trx.commit();
     } catch (error) {
       await trx.rollback();
       return response.badRequest(error);
@@ -116,7 +116,6 @@ export default class UsersController {
 
     try {
       const user = await User.query().where('email', updatedUser.email).preload('roles').first();
-      trx.commit();
       return response.ok(user)
     } catch (error) {
       await trx.rollback();
