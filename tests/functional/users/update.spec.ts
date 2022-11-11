@@ -1,5 +1,6 @@
 import Database from "@ioc:Adonis/Lucid/Database";
 import { test } from "@japa/runner";
+import User from "App/Models/User";
 import { UserFactory } from "Database/factories";
 
 test.group('update user', (group) => {
@@ -11,7 +12,7 @@ test.group('update user', (group) => {
         return () => Database.rollbackGlobalTransaction()
     })
 
-    test('return forbidden when user try to updade an id different than yours', async ({ client, route }) => {
+    test('return forbidden when user try to update an id different than yours', async ({ client, route }) => {
         const user = await UserFactory.create();
         const response = await client.put(route('UsersController.update', ['1'])).loginAs(user);
         response.assertStatus(403);
@@ -25,7 +26,11 @@ test.group('update user', (group) => {
             .json({ email: 'emailtest@email.com' })
             .loginAs(user);
         response.assertStatus(200);
-        response.assertBodyContains(response.body())
+        const userUpdated = await User.query().where('secure_id', user.secureId).preload('roles').first();
+        response.assertBodyContains({
+            name: userUpdated?.name,
+            email: userUpdated?.email,
+        })
     })
 
 })
