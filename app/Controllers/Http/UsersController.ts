@@ -69,8 +69,14 @@ export default class UsersController {
   public async show({ auth, params, response }: HttpContextContract) {
     const userSecureId = params.id;
     const userAuthenticated = auth.user;
-    if (userSecureId !== userAuthenticated?.secureId)
-      throw new Error('You are not authorized to see this user info');
+
+    try {
+      if (userSecureId !== userAuthenticated?.secureId)
+        throw new Error('You are not authorized to see this user info');
+    } catch (error) {
+        return response.forbidden({ message: error.message })
+    }
+
     try {
       const user = await User
         .query()
@@ -97,13 +103,18 @@ export default class UsersController {
     const userSecureId = params.id;
     const userAuthenticated = auth.user;
 
-    if (userSecureId !== userAuthenticated?.secureId)
-      throw new Error('You are not authorized to see this user info');
+    try {
+      if (userSecureId !== userAuthenticated?.secureId)
+        throw new Error('You are not authorized to edit this user info');
+    } catch (error) {
+        return response.forbidden({ message: error.message })
+    }
 
     const requestBody = request.only(["name", "email", "password"]);
     const trx = await Database.transaction();
 
     let updatedUser: User;
+
     try {
       updatedUser = await User.findByOrFail('secure_id', userSecureId);
       updatedUser.useTransaction(trx);
