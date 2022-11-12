@@ -1,10 +1,12 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import Database from '@ioc:Adonis/Lucid/Database';
+import WelcomeEmail from 'App/Mailers/WelcomeEmail';
 import Role from 'App/Models/Role';
 import User from 'App/Models/User'
 import { sendWelcomeMail } from 'App/Services/sendMail';
 import StoreValidator from 'App/Validators/User/StoreValidator';
 import UpdateValidator from 'App/Validators/User/UpdateValidator';
+import mjml from 'mjml'
 
 export default class UsersController {
   public async index({ bouncer, request, response }: HttpContextContract) {
@@ -51,14 +53,15 @@ export default class UsersController {
     }
     let user: User | null;
     try {
-      user = await User.query().where('email', newUser.email).preload('roles').first();
+      user = await User.query().where('email', newUser.email).preload('roles').firstOrFail();
       response.created(user);
     } catch (error) {
       return response.badRequest({ message: 'error creating user', originalError: error.message });
     }
 
     try {
-      await sendWelcomeMail(user as User, 'email/welcome');
+      const welcomeEmail = new WelcomeEmail(user);
+      await welcomeEmail.send()
       trx.commit();
     } catch (error) {
       trx.rollback();
