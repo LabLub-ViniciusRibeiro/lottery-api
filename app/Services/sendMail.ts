@@ -1,26 +1,6 @@
 import Mail from "@ioc:Adonis/Addons/Mail";
 import User from "App/Models/User";
 
-export async function sendRecoverPasswordMail(user: User, token: string, template: string) {
-    await Mail.send(message => {
-        message
-            .from('admin@lottery.com')
-            .to(user.email)
-            .subject("Update password")
-            .htmlView(template, { user, token });
-    })
-}
-
-export async function sendWelcomeMail(user: User, template: string) {
-    await Mail.send(message => {
-        message
-            .from('admin@lottery.com')
-            .to(user.email)
-            .subject("Welcome to the Lottery App!")
-            .htmlView(template, { user });
-    })
-}
-
 export async function sendNewBetMail(user: User, bets: string, template: string) {
     await Mail.send(message => {
         message

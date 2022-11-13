@@ -1,8 +1,8 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import Env from '@ioc:Adonis/Core/Env'
 import User from 'App/Models/User';
-import { sendRecoverPasswordMail } from 'App/Services/sendMail';
 import LoginValidator from 'App/Validators/Auth/LoginValidator';
+import RecoverPasswordEmail from 'App/Mailers/RecoverPasswordEmail';
 
 const EXPIRES_IN = Env.get('NODE_ENV') === 'development' ? '' : '30mins'
 
@@ -31,7 +31,8 @@ export default class AuthController {
             const user = await User.findByOrFail('email', email);
             const { tokenHash } = await auth.use('api').generate(user);
             user.merge({ rememberMeToken: tokenHash }).save();
-            await sendRecoverPasswordMail(user, tokenHash, 'email/recover');
+            const recoverPasswordEmail = new RecoverPasswordEmail(user, tokenHash);
+            await recoverPasswordEmail.send(); 
             return response.ok({ message: 'Token created successfully' });
         } catch (error) {
             return response.badRequest({ message: 'Error sending recover email', originalMessage: error.message });

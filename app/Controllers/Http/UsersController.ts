@@ -3,10 +3,8 @@ import Database from '@ioc:Adonis/Lucid/Database';
 import WelcomeEmail from 'App/Mailers/WelcomeEmail';
 import Role from 'App/Models/Role';
 import User from 'App/Models/User'
-import { sendWelcomeMail } from 'App/Services/sendMail';
 import StoreValidator from 'App/Validators/User/StoreValidator';
 import UpdateValidator from 'App/Validators/User/UpdateValidator';
-import mjml from 'mjml'
 
 export default class UsersController {
   public async index({ bouncer, request, response }: HttpContextContract) {
