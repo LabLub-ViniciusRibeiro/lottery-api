@@ -1,9 +1,9 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
+import BetsCreatedEmail from 'App/Mailers/BetsCreatedEmail';
 import Bet from 'App/Models/Bet'
 import Cart from 'App/Models/Cart';
 import Game from 'App/Models/Game';
 import User from 'App/Models/User';
-import { sendNewBetMail } from 'App/Services/sendMail';
 import StoreValidator from 'App/Validators/Bet/StoreValidator';
 
 
@@ -74,9 +74,10 @@ export default class BetsController {
     try {
       const betsToDisplay = await Promise.all(bets.map(async bet => {
         const game = await Game.findBy('id', bet.gameId);
-        return (`|Choosen numbers: ${bet.chosenNumbers}, game: ${game?.type}| `);
+        return (`-- Chosen numbers: ${bet.chosenNumbers}, game: ${game?.type} --`);
       }));
-      await sendNewBetMail(auth.user as User, betsToDisplay.join(', '), 'email/newBet');
+      const betsCreatedEmail = new BetsCreatedEmail(auth.user as User, betsToDisplay.join(', '));
+      await betsCreatedEmail.send();
     } catch (error) {
       response.badRequest({ message: 'Error sending new bets mail', originalMessage: error.message });
     }
