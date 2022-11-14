@@ -70,12 +70,16 @@ export default class UsersController {
   public async show({ auth, params, response }: HttpContextContract) {
     const userSecureId = params.id;
     const userAuthenticated = auth.user;
+    const user = auth.user as User;
+    const userRoles = (await user.related('roles').query()).map(role => role.name);
 
-    try {
-      if (userSecureId !== userAuthenticated?.secureId)
-        throw new Error('You are not authorized to see this user info');
-    } catch (error) {
+    if (!userRoles.includes('admin')) {
+      try {
+        if (userSecureId !== userAuthenticated?.secureId)
+          throw new Error('You are not authorized to see this user info');
+      } catch (error) {
         return response.forbidden({ message: error.message })
+      }
     }
 
     try {
@@ -96,47 +100,46 @@ export default class UsersController {
     } catch (error) {
       response.notFound({ message: error.message });
     }
-
   }
 
   public async update({ auth, request, params, response }: HttpContextContract) {
-    await request.validate(UpdateValidator);
-    const userSecureId = params.id;
-    const userAuthenticated = auth.user;
+  await request.validate(UpdateValidator);
+  const userSecureId = params.id;
+  const userAuthenticated = auth.user;
 
-    try {
-      if (userSecureId !== userAuthenticated?.secureId)
-        throw new Error('You are not authorized to edit this user info');
-    } catch (error) {
-        return response.forbidden({ message: error.message })
-    }
-
-    const requestBody = request.only(["name", "email", "password"]);
-
-    let updatedUser: User;
-
-    try {
-      updatedUser = await User.findByOrFail('secure_id', userSecureId);
-      await updatedUser.merge(requestBody).save();
-    } catch (error) {
-      return response.badRequest(error);
-    }
-
-    try {
-      const user = await User.query().where('email', updatedUser.email).preload('roles').first();
-      return response.ok(user)
-    } catch (error) {
-      return response.badRequest(error)
-    }
+  try {
+    if (userSecureId !== userAuthenticated?.secureId)
+      throw new Error('You are not authorized to edit this user info');
+  } catch (error) {
+    return response.forbidden({ message: error.message })
   }
+
+  const requestBody = request.only(["name", "email", "password"]);
+
+  let updatedUser: User;
+
+  try {
+    updatedUser = await User.findByOrFail('secure_id', userSecureId);
+    await updatedUser.merge(requestBody).save();
+  } catch (error) {
+    return response.badRequest(error);
+  }
+
+  try {
+    const user = await User.query().where('email', updatedUser.email).preload('roles').first();
+    return response.ok(user)
+  } catch (error) {
+    return response.badRequest(error)
+  }
+}
 
   public async destroy({ params, response }: HttpContextContract) {
-    try {
-      const user = await User.findByOrFail('secure_id', params.id);
-      await user.delete();
-      response.ok({ message: 'User deleted!' });
-    } catch (error) {
-      response.ok({ message: 'Error deleting user', originalMessage: error.message });
-    }
+  try {
+    const user = await User.findByOrFail('secure_id', params.id);
+    await user.delete();
+    response.ok({ message: 'User deleted!' });
+  } catch (error) {
+    response.ok({ message: 'Error deleting user', originalMessage: error.message });
   }
+}
 }
