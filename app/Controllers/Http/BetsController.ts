@@ -13,12 +13,11 @@ interface IBetsRequest {
 
 export default class BetsController {
   public async index({ auth, request, response }: HttpContextContract) {
-    const { ...inputs } = request.qs();
     try {
       const bets = await Bet.query()
         .where("user_id", auth.user?.id as number)
         .preload("game", (game) => game.select(["type", "color", "price"]))
-        .whereHas("game", (scope) => scope.filter(inputs.type));
+        .whereHas("game", (scope) => scope.filter(request.qs()));
       return response.send(bets);
     } catch (error) {
       return response.badRequest({ message: error.message });
