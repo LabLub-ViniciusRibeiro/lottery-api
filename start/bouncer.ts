@@ -5,8 +5,8 @@
  * file.
  */
 
-import Bouncer from '@ioc:Adonis/Addons/Bouncer'
-import User from 'App/Models/User'
+import Bouncer from "@ioc:Adonis/Addons/Bouncer";
+import User from "App/Models/User";
 
 /*
 |--------------------------------------------------------------------------
@@ -30,12 +30,11 @@ import User from 'App/Models/User'
 | NOTE: Always export the "actions" const from this file
 |****************************************************************
 */
-export const { actions } = Bouncer
-    .define('is adm', async (user: User) => {
-        const roles = await user.related('roles').query();
-        const rolesName = roles.map(role => role.name);
-        return rolesName.includes('admin');
-    })
+export const { actions } = Bouncer.define("is adm", async (user: User) => {
+  const roles = await user.related("roles").query();
+  const rolesName = roles.map((role) => role.name);
+  return rolesName.includes("admin");
+});
 
 /*
 |--------------------------------------------------------------------------
@@ -60,4 +59,4 @@ export const { actions } = Bouncer
 | NOTE: Always export the "policies" const from this file
 |****************************************************************
 */
-export const { policies } = Bouncer.registerPolicies({})
+export const { policies } = Bouncer.registerPolicies({});

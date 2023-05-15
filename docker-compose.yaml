@@ -1,0 +1,45 @@
+version: '3.1'
+
+services:
+
+  # api:
+  #   build: .
+  #   restart: always
+  #   depends_on:
+  #     - db
+  #   ports:
+  #     - 3333:3333
+  #   volumes:
+  #     - ./:/home/node/app
+  #   command: sh -c "node ace migration:run && node ace db:seed && npm run dev"
+  #   environment:
+  #     MYSQL_HOST: mysql
+  #     MYSQL_USER: root
+  #     MYSQL_PORT: 3306
+  #     MYSQL_PASSWORD: secret
+  #     MYSQL_DB: lottery_db
+  #   networks:
+  #     - lottery_network
+
+  db:
+    image: mysql:8.0.33
+    # NOTE: use of "mysql_native_password" is not recommended: https://dev.mysql.com/doc/refman/8.0/en/upgrading-from-previous-series.html#upgrade-caching-sha2-password
+    # (this is just an example, not intended to be a production configuration)
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    ports:
+      - 3306:3306
+    volumes:
+      - lottery_db:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_DATABASE: lottery_db
+    # networks:
+    #   - lottery_network
+
+volumes:
+  lottery_db: 
+
+# networks:
+#   lottery_network:
+#     driver: bridge
