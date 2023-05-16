@@ -2,24 +2,38 @@ version: '3.1'
 
 services:
 
-  # api:
-  #   build: .
-  #   restart: always
-  #   depends_on:
-  #     - db
-  #   ports:
-  #     - 3333:3333
-  #   volumes:
-  #     - ./:/home/node/app
-  #   command: sh -c "node ace migration:run && node ace db:seed && npm run dev"
-  #   environment:
-  #     MYSQL_HOST: mysql
-  #     MYSQL_USER: root
-  #     MYSQL_PORT: 3306
-  #     MYSQL_PASSWORD: secret
-  #     MYSQL_DB: lottery_db
-  #   networks:
-  #     - lottery_network
+  frontend:
+    build: ../lottery-react
+    depends_on:
+      - api
+    ports:
+      - 5173:5173
+    volumes:
+      - frontend_volume:/usr/src/app
+    networks:
+      - lottery_network
+
+  api:
+    build: .
+    restart: always
+    depends_on:
+      - db
+    ports:
+      - 3333:3333
+    volumes:
+      - api_volume:/home/node/app
+    command: sh -c "node ace migration:run && node ace db:seed && npm run dev"
+    environment:
+      DRIVE_DISK: local
+      DB_CONNECTION: mysql
+      APP_KEY: GyFVAH6kXPtIhNDvR_9h6F-p14kKMUod
+      MYSQL_HOST: db
+      MYSQL_USER: root
+      MYSQL_PORT: 3306
+      MYSQL_PASSWORD: secret
+      MYSQL_DB_NAME: lottery_db
+    networks:
+      - lottery_network
 
   db:
     image: mysql:8.0.33
@@ -34,12 +48,14 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: secret
       MYSQL_DATABASE: lottery_db
-    # networks:
-    #   - lottery_network
+    networks:
+      - lottery_network
 
 volumes:
-  lottery_db: 
+  lottery_db:
+  api_volume:
+  frontend_volume:
 
-# networks:
-#   lottery_network:
-#     driver: bridge
+networks:
+  lottery_network:
+    driver: bridge
