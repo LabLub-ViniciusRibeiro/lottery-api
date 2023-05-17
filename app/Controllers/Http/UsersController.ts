@@ -62,17 +62,17 @@ export default class UsersController {
       });
     }
 
-    try {
-      const welcomeEmail = new WelcomeEmail(user);
-      await welcomeEmail.send();
-      trx.commit();
-    } catch (error) {
-      trx.rollback();
-      return response.badRequest({
-        message: "Error sending welcome email",
-        original: error.message,
-      });
-    }
+    // try {
+    //   const welcomeEmail = new WelcomeEmail(user);
+    //   await welcomeEmail.send();
+    //   trx.commit();
+    // } catch (error) {
+    //   trx.rollback();
+    //   return response.badRequest({
+    //     message: "Error sending welcome email",
+    //     original: error.message,
+    //   });
+    // }
   }
 
   public async index({ auth, params, response }: HttpContextContract) {
